@@ -19,6 +19,7 @@ module.exports = (passport, app) => {
     app.use(express.static(path.join(__dirname, "public")));
     app.use(require('cookie-parser')());
     app.use(require('body-parser').urlencoded({ extended: true }));
+    app.use(require('body-parser').json());
     app.engine("handlebars", exphbs({"defaultLayout": "main"}));
     app.set("view engine", "handlebars");
 
@@ -57,10 +58,10 @@ module.exports = (passport, app) => {
     })
 
     /**
-     * Showe account list.
+     * Show account list.
      */
     app.get("/accounts", require("connect-ensure-login").ensureLoggedIn(), (req, res) => {
-        dbpool.query("select id, name from salesforce.account order by name desc").then(result => {
+        dbpool.query("select id, sfid, name from salesforce.account order by name asc").then(result => {
             const ctx = Object.assign({
                 "accounts": result.rows
             }, buildDefaultContext(req));
@@ -73,5 +74,24 @@ module.exports = (passport, app) => {
             return res.render("error", ctx);
         })
     });
+
+    /**
+     * Save account.
+     */
+    app.post("/accounts", (req, res) => {
+        res.type("json");
+        if (!req.user) return res.status(401).send({"error": true, "message": "Unauthorized"});
+
+        // get body and validate
+        const input = req.body;
+        if (!input.hasOwnProperty("name") || !input.name) {
+            return res.status(417).send({"error": true, "message": "Missing name in \"name\" property"});
+        }
+        dbpool.query(`insert into salesforce.account (name) values ('${input.name}');`).then(result => {
+            return res.status(201).send({"name": input.name}).end();
+        }).catch(err => {
+            return res.status(500).send({"error": true, "message": err.message});
+        })
+    })
 
 }

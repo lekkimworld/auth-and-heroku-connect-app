@@ -5,3 +5,7 @@ body {
 .color-white {
     color: #fff;
 }
+
+i:hover {
+    cursor: pointer;
+}

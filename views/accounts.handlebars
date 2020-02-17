@@ -1,1 +1,124 @@
-<h1>Accounts</h1>
+<div class="row">
+    <div class="col-10">
+        <h3>Accounts</h3>
+    </div>
+    <div class="col-2" id="action-icons">
+        <i class="fa fa-plus fa-2x" aria-hidden="true" rel="add"></i>
+    </div>
+</div>
+{{#if accounts}}
+<table class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th scope="col"></th>
+            <th scope="col">ID</th>
+            <th scope="col">NAME</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{#each accounts}}
+        <tr id="{{this.sfid}}">
+            <td>
+                <center>
+                    <i class="fa fa-link" aria-hidden="true" rel="link"></i>
+                </center>
+            </td>
+            <th scope="row">{{this.name}}</th>
+            <td>{{this.sfid}}</td>
+        </tr>
+        {{/each}}
+    </tbody>
+</table>
+{{else}}
+No accounts found.
+{{/if}}
+
+<div class="modal fade" id="accountModal" tabindex="-1" role="dialog" aria-labelledby="accountModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="sensorModalLabel">Create Account</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="accountForm" novalidate>
+                    <div class="form-group">
+                        <label for="nameInput">Name</label>
+                        <input type="text" required class="form-control" id="nameInput" aria-describedby="nameHelp" placeholder="Enter account name">
+                        <small id="nameHelp" class="form-text text-muted">Specify the name of the account.</small>
+                        <div class="invalid-feedback">
+                            You must specify the name for the account.
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="save_account">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const instanceurl = "{{user._json.urls.custom_domain}}";
+    const openForm = function() {
+        $("#accountModal").modal("show");
+    }
+    $("#action-icons").on("click", ev => {
+        if (ev.target.getAttribute("rel") === "add") {
+            openForm();
+        }
+    })
+
+    $("tbody").on("click", ev => {
+        let elem = ev.target.parentElement;
+        let id = elem.id;
+        while (!id) {
+            elem = elem.parentElement;
+            id = elem.id;
+        }
+        if (ev.target.nodeName === "I") {
+            const rel = ev.target.getAttribute("rel");
+            if (rel === "link") {
+                window.open(`${instanceurl}/lightning/r/Account/${id}/view`, "_new");
+            }
+        }
+    })
+
+    $("#save_account").on("click", ev => {
+        const form = document.querySelector("#accountForm");
+        if (!form.checkValidity()) {
+            form.classList.add('was-validated');
+            return;
+        }
+
+        // get field values
+        const nameField = $("#nameInput");
+        let fetchCtx = {
+            "body": JSON.stringify({
+                "name": nameField.val()
+            }),
+            "headers": {
+                "Content-Type": "application/json"
+            },
+            "method": "POST"
+        }
+
+        fetch(`/accounts`, fetchCtx).then(res => res.json()).then(body => {
+            console.log(body)
+            if (body.hasOwnProperty("error") && body.error) {
+                form.classList.add('was-validated');
+            } else {
+                // clear form and close modal
+                form.classList.remove('was-validated');
+                $("#nameInput").val("");
+                $("#accountModal").modal("hide"); 
+                document.location.reload();
+            }
+        })
+    })   
+        
+</script>
