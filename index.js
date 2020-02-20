@@ -3,21 +3,24 @@ require("dotenv").config();
 const uuid = require("uuid/v4");
 const passport = require("passport");
 const Strategy = require("passport-salesforce-oauth2").Strategy;
+const myutils = require("./myutils");
 
-// configure Salesforce OAuth
-passport.use(new Strategy({
-    clientID: process.env.CLIENT_ID,
-    clientSecret: process.env.CLIENT_SECRET,
-    callbackURL: process.env.REDIRECT_URI
-}, (accessToken, refreshToken, profile, cb) => {
-    return cb(null, profile);
-}));
-passport.serializeUser(function(user, cb) {
-    cb(null, user);
-});
-passport.deserializeUser(function(obj, cb) {
-    cb(null, obj);
-});
+// configure Salesforce OAuth if present
+if (myutils.authenticationConfigured()) {
+    passport.use(new Strategy({
+        clientID: process.env.CLIENT_ID,
+        clientSecret: process.env.CLIENT_SECRET,
+        callbackURL: process.env.REDIRECT_URI
+    }, (accessToken, refreshToken, profile, cb) => {
+        return cb(null, profile);
+    }));
+    passport.serializeUser(function(user, cb) {
+        cb(null, user);
+    });
+    passport.deserializeUser(function(obj, cb) {
+        cb(null, obj);
+    });
+}
 
 // create app and use auth
 const app = express();
@@ -26,8 +29,11 @@ app.use(require('express-session')({
     "resave": true, 
     "saveUninitialized": true
 }));
-app.use(passport.initialize());
-app.use(passport.session());
+// configure Salesforce OAuth if present
+if (myutils.authenticationConfigured()) {
+    app.use(passport.initialize());
+    app.use(passport.session());
+}
 
 // configure
 require("./configure-express")(passport, app);

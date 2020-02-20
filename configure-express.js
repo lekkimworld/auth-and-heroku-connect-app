@@ -2,11 +2,16 @@ const express = require("express");
 const {Pool} = require("pg");
 const exphbs = require("express-handlebars")
 const path = require("path");
+const myutils = require("./myutils");
+
 
 const buildDefaultContext = (req) => {
-    return {
-        "user": req.user
+    // using oauth for auth
+    const obj = {
+        "allow_auth": myutils.authenticationConfigured()
     }
+    if (req.user) obj.user = req.user;
+    return obj;
 }
 
 // database connection pool
@@ -50,17 +55,27 @@ module.exports = (passport, app) => {
      * Show root page.
      */
     app.get("/", (req, res) => {
-        if (req.user) {
-            return res.render("root_auth", buildDefaultContext(req));
+        const ctx = buildDefaultContext(req);
+        if (ctx.hasOwnProperty("allow_auth") && ctx.allow_auth === true) {
+            if (req.user) {
+                return res.render("root_auth", ctx);
+            } else {
+                return res.render("root_unauth", ctx);
+            }
+        } else if (process.env.DATABASE_URL) {
+            return res.redirect("/accounts");
         } else {
-            return res.render("root_unauth");
+            return res.render("root_noauth", ctx);
         }
     })
 
     /**
      * Show account list.
      */
-    app.get("/accounts", require("connect-ensure-login").ensureLoggedIn(), (req, res) => {
+    app.get("/accounts", (req, res) => {
+        if (myutils.authenticationConfigured() && !req.user) {
+            return res.redirect("/login");
+        }
         dbpool.query("select id, sfid, name from salesforce.account order by name asc").then(result => {
             const ctx = Object.assign({
                 "accounts": result.rows
@@ -80,7 +95,7 @@ module.exports = (passport, app) => {
      */
     app.post("/accounts", (req, res) => {
         res.type("json");
-        if (!req.user) return res.status(401).send({"error": true, "message": "Unauthorized"});
+        if (myutils.authenticationConfigured() && !req.user) return res.status(401).send({"error": true, "message": "Unauthorized"});
 
         // get body and validate
         const input = req.body;
