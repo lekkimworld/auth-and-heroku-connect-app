@@ -76,9 +76,13 @@ module.exports = (passport, app) => {
         if (myutils.authenticationConfigured() && !req.user) {
             return res.redirect("/login");
         }
-        dbpool.query("select id, sfid, name from salesforce.account order by name asc").then(result => {
+        dbpool.query("select * from salesforce.account order by name asc").then(result => {
+            let external_id = false;
+            if (result && result.rowCount > 0) external_id = result.rows[0].hasOwnProperty("external_id__c");
+
             const ctx = Object.assign({
-                "accounts": result.rows
+                "accounts": result.rows,
+                "external_id": external_id
             }, buildDefaultContext(req));
             return res.render("accounts", ctx);
         }).catch(err => {

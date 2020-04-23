@@ -11,8 +11,11 @@
     <thead>
         <tr>
             <th scope="col"></th>
-            <th scope="col">ID</th>
             <th scope="col">NAME</th>
+            <th scope="col">SALESFORCE ID</th>
+            {{#if external_id}}
+            <th scope="col">EXTERNAL ID</th>
+            {{/if}}
         </tr>
     </thead>
     <tbody>
@@ -25,6 +28,9 @@
             </td>
             <th scope="row">{{this.name}}</th>
             <td>{{this.sfid}}</td>
+            {{#if this.external_id__c}}
+            <td>{{this.external_id__c}}</td>
+            {{/if}}
         </tr>
         {{/each}}
     </tbody>
