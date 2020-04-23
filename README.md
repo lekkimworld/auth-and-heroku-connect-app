@@ -10,6 +10,8 @@ Simple Heroku app with Salesforce authentication and Heroku Connect for data.
     - `CLIENT_SECRET`
     - `REDIRECT_URI`
     - `SANDBOX` (if running against a sandbox - authorization and token URL will be using test.salesforce.com instead of login.salesforce.com)
+    - `AUTH_URL` (full URL for authorization endpoint - required for scratch org)
+    - `TOKEN_URL` (full URL for token endpoint - required for scratch org)
 
 
 ## Required Add-ons ##
