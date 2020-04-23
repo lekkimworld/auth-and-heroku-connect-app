@@ -8,9 +8,12 @@ const myutils = require("./myutils");
 // configure Salesforce OAuth if present
 if (myutils.authenticationConfigured()) {
     passport.use(new Strategy({
-        clientID: process.env.CLIENT_ID,
-        clientSecret: process.env.CLIENT_SECRET,
-        callbackURL: process.env.REDIRECT_URI
+        "authorizationURL": process.env.SANDBOX ? "https://test.salesforce.com/services/oauth2/authorize" : undefined,
+        "tokenURL": process.env.SANDBOX ? "https://test.salesforce.com/services/oauth2/token" : undefined,
+        "profileURL": process.env.SANDBOX ? "https://test.salesforce.com/services/oauth2/userinfo" : undefined,
+        "clientID": process.env.CLIENT_ID,
+        "clientSecret": process.env.CLIENT_SECRET,
+        "callbackURL": process.env.REDIRECT_URI
     }, (accessToken, refreshToken, profile, cb) => {
         return cb(null, profile);
     }));
