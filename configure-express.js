@@ -8,6 +8,8 @@ const myutils = require("./myutils");
 const buildDefaultContext = (req) => {
     // using oauth for auth
     const obj = {
+        "title": process.env.PAGE_TITLE || "Heroku Enablement - Demo 2",
+        "action_add": process.env.NO_ADD_ACTION ? undefined : true,
         "allow_auth": myutils.authenticationConfigured()
     }
     if (req.user) obj.user = req.user;
@@ -78,11 +80,16 @@ module.exports = (passport, app) => {
         }
         dbpool.query("select * from salesforce.account order by name asc").then(result => {
             let external_id = false;
-            if (result && result.rowCount > 0) external_id = result.rows[0].hasOwnProperty("external_id__c");
+            let account_rating = false;
+            if (result && result.rowCount > 0) {
+                external_id = result.rows[0].hasOwnProperty("external_id__c");
+                account_rating = result.rows[0].hasOwnProperty("account_rating__c");
+            }
 
             const ctx = Object.assign({
                 "accounts": result.rows,
-                "external_id": external_id
+                "external_id": external_id,
+                "account_rating": account_rating
             }, buildDefaultContext(req));
             return res.render("accounts", ctx);
         }).catch(err => {

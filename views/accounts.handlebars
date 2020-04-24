@@ -3,7 +3,9 @@
         <h3>Accounts</h3>
     </div>
     <div class="col-2" id="action-icons">
-        <i class="fa fa-plus fa-2x" aria-hidden="true" rel="add"></i>
+        {{#if action_add}}
+            <i class="fa fa-plus fa-2x" aria-hidden="true" rel="add"></i>
+        {{/if}}
     </div>
 </div>
 {{#if accounts}}
@@ -14,7 +16,10 @@
             <th scope="col">NAME</th>
             <th scope="col">SALESFORCE ID</th>
             {{#if external_id}}
-            <th scope="col">EXTERNAL ID</th>
+                <th scope="col">EXTERNAL ID</th>
+            {{/if}}
+            {{#if account_rating}}
+                <th scope="col">ACCOUNT RATING</th>
             {{/if}}
         </tr>
     </thead>
@@ -29,7 +34,10 @@
             <th scope="row">{{this.name}}</th>
             <td>{{this.sfid}}</td>
             {{#if ../external_id}}
-            <td>{{this.external_id__c}}</td>
+                <td>{{this.external_id__c}}</td>
+            {{/if}}
+            {{#if ../account_rating}}
+                <td>{{this.account_rating__c}}</td>
             {{/if}}
         </tr>
         {{/each}}
