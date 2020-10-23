@@ -2,5 +2,5 @@
 	"name": "auth-and-heroku-connect-app",
 	"description": "Simple Heroku app with Salesforce authentication and Heroku Connect for data.",
 	"success_url": "/",
-	"addons": ["heroku-postgresql:hobby-dev", "heroku-connect:demo"]
+	"addons": ["heroku-postgresql:hobby-dev", "herokuconnect:demo"]
 }
