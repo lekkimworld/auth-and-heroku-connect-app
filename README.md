@@ -1,6 +1,8 @@
 # auth-and-heroku-connect-app
 Simple Heroku app with Salesforce authentication and Heroku Connect for data. 
 
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+
 ## Installation ##
 * Create an app on Heroku
 * Deploy app code directly from Github
@@ -26,3 +28,4 @@ When deciding which endpoint to use the most specific is read before `SANDBOX` b
 
 ## Optional Add-ons ##
 * Papertrail (`papertrail:choklad`)
+
